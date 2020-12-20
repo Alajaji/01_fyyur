@@ -63,7 +63,7 @@ def create_app(test_config=None):
                 'categories': formatted_categories
             })
         except:
-            abort(400)
+            abort(404)
 
     '''
   @TODO:
@@ -95,7 +95,7 @@ def create_app(test_config=None):
                 'categories': current_cat
             })
         except:
-            abort(400)
+            abort(404)
     '''
   @TODO:
   Create an endpoint to DELETE question using a question ID.
@@ -220,7 +220,7 @@ def create_app(test_config=None):
             })
 
         except:
-            abort(400)
+            abort(404)
 
     '''
   @TODO:
