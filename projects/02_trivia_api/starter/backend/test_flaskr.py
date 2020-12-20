@@ -53,14 +53,6 @@ class TriviaTestCase(unittest.TestCase):
         self.assertEqual(data['success'], True)
         self.assertTrue(len(data['questions']))
 
-    def test_400_bad_request(self):
-        res = self.client().post('/quizzes', json={'nothing': 1})
-        data = json.loads(res.data)
-
-        self.assertEqual(res.status_code, 400)
-        self.assertEqual(data['success'], False)
-        self.assertTrue(data['message'], 'Bad request')
-
     def test_404_requesting_beyond_valid_page(self):
         res = self.client().get('/questions?page=1000', json={'nothing': 1})
         data = json.loads(res.data)
@@ -68,6 +60,72 @@ class TriviaTestCase(unittest.TestCase):
         self.assertEqual(res.status_code, 404)
         self.assertEqual(data['success'], False)
         self.assertTrue(data['message'], 'Not found')
+
+    def test_post_questions(self):
+        res = self.client().post('/questions', json=self.new_question)
+        data = json.loads(res.data)
+
+        self.assertEqual(res.status_code, 200)
+        self.assertEqual(data['success'], True)
+        self.assertEqual(data['question'], 'this is a test question')
+
+    def test_delete_questions(self):
+        res = self.client().delete('/questions/20')
+        data = json.loads(res.data)
+
+        self.assertEqual(res.status_code, 200)
+        self.assertEqual(data['deleted'], 20)
+        self.assertTrue(len(data['questions']))
+
+    def test_422_question_cannot_be_deleted(self):
+        res = self.client().delete('/questions/2000')
+        data = json.loads(res.data)
+
+        self.assertEqual(res.status_code, 422)
+        self.assertEqual(data['success'], False)
+        self.assertTrue(data['message'], 'unprocessable ')
+
+    def test_search_questions(self):
+        res = self.client().post('/questions/search',
+                                 json={"searchTerm": "cup"})
+        data = json.loads(res.data)
+
+        self.assertEqual(res.status_code, 200)
+        self.assertEqual(data['success'], True)
+        self.assertEqual(len(data['questions']), 2)
+
+    def test_404_search_not_found(self):
+        res = self.client().post('/questions/search',
+                                 json={'searchTerm': 'udacity'})
+        data = json.loads(res.data)
+
+        self.assertEqual(res.status_code, 404)
+        self.assertEqual(data['success'], False)
+        self.assertTrue(data['message'], 'Not found')
+
+    def test_quiz(self):
+        res = self.client().post('/quizzes',
+                                 json={
+                                     "previous_questions": [],
+                                     "quiz_category": {
+                                         "type": "click",
+                                         "id": 1
+                                     }
+                                 })
+        data = json.loads(res.data)
+
+        self.assertEqual(res.status_code, 200)
+        self.assertEqual(data['success'], True)
+        self.assertEqual(data['current_category'], 1)
+
+    def test_400_bad_request_quizzes(self):
+        res = self.client().post('/quizzes', json={'nothing': 1})
+        data = json.loads(res.data)
+
+        self.assertEqual(res.status_code, 400)
+        self.assertEqual(data['success'], False)
+        self.assertTrue(data['message'], 'Bad request')
+
     """
     TODO
     Write at least one test for each test for successful operation and for expected errors.
